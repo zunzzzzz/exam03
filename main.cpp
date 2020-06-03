@@ -39,8 +39,8 @@ float v[30];
 void GetVelocity(Arguments *in, Reply *out) {
     pc.printf("Here\r\n");
     for(int i = 0; i < 30; i++) {
-        pc.printf("v[%d] = %f\r\n", i, v[i]);
-        // xbee.printf("%f\r\n", v[i]);
+        // pc.printf("v[%d] = %f\r\n", i, v[i]);
+        xbee.printf("%f\r\n", v[i]);
     }
 }
 
@@ -143,58 +143,53 @@ void xbee_rx_interrupt(void)
 
 void xbee_rx(void)
 {
-  char buf[100] = {0};
-  char outbuf[100] = {0};
-  while(xbee.readable()){
-    for (int i=0; ; i++) {
-      char recv = xbee.getc();
-      if (recv == '\r') {
-        break;
-      }
-      buf[i] = pc.putc(recv);
+    char buf[100] = {0};
+    char outbuf[100] = {0};
+    while(xbee.readable()){
+        for (int i=0; ; i++) {
+            char recv = xbee.getc();
+            if (recv == '\r') {
+                break;
+            }
+            buf[i] = pc.putc(recv);
+        }
+        pc.printf("\r\n");
+        // RPC::call(buf, outbuf);
+        RPC::call("/GetVelocity/run", outbuf);
+        wait(0.1);
     }
-    pc.printf("\r\n");
-    RPC::call(buf, outbuf);
-    // pc.printf("%s\r\n", outbuf);
-    wait(0.1);
-    wait(5);
-    for(int i = 0; i < 30; i++) {
-        pc.printf("v[%d] = %f\r\n", i, v[i]);
-        xbee.printf("%f\r\n", v[i]);
-    }
-  }
-  xbee.attach(xbee_rx_interrupt, Serial::RxIrq); // reattach interrupt
+    xbee.attach(xbee_rx_interrupt, Serial::RxIrq); // reattach interrupt
 }
 
 void reply_messange(char *xbee_reply, char *messange){
-  xbee_reply[0] = xbee.getc();
-  xbee_reply[1] = xbee.getc();
-  xbee_reply[2] = xbee.getc();
-  if(xbee_reply[1] == 'O' && xbee_reply[2] == 'K'){
-    pc.printf("%s\r\n", messange);
-    xbee_reply[0] = '\0';
-    xbee_reply[1] = '\0';
-    xbee_reply[2] = '\0';
-  }
+    xbee_reply[0] = xbee.getc();
+    xbee_reply[1] = xbee.getc();
+    xbee_reply[2] = xbee.getc();
+    if(xbee_reply[1] == 'O' && xbee_reply[2] == 'K'){
+        pc.printf("%s\r\n", messange);
+        xbee_reply[0] = '\0';
+        xbee_reply[1] = '\0';
+        xbee_reply[2] = '\0';
+    }
 }
 
 void check_addr(char *xbee_reply, char *messenger){
-  xbee_reply[0] = xbee.getc();
-  xbee_reply[1] = xbee.getc();
-  xbee_reply[2] = xbee.getc();
-  xbee_reply[3] = xbee.getc();
-  pc.printf("%s = %c%c%c\r\n", messenger, xbee_reply[1], xbee_reply[2], xbee_reply[3]);
-  xbee_reply[0] = '\0';
-  xbee_reply[1] = '\0';
-  xbee_reply[2] = '\0';
-  xbee_reply[3] = '\0';
+    xbee_reply[0] = xbee.getc();
+    xbee_reply[1] = xbee.getc();
+    xbee_reply[2] = xbee.getc();
+    xbee_reply[3] = xbee.getc();
+    pc.printf("%s = %c%c%c\r\n", messenger, xbee_reply[1], xbee_reply[2], xbee_reply[3]);
+    xbee_reply[0] = '\0';
+    xbee_reply[1] = '\0';
+    xbee_reply[2] = '\0';
+    xbee_reply[3] = '\0';
 }
 void FXOS8700CQ_readRegs(int addr, uint8_t * data, int len) {
-   char t = addr;
-   i2c.write(m_addr, &t, 1, true);
-   i2c.read(m_addr, (char *)data, len);
+    char t = addr;
+    i2c.write(m_addr, &t, 1, true);
+    i2c.read(m_addr, (char *)data, len);
 }
 
 void FXOS8700CQ_writeRegs(uint8_t * data, int len) {
-   i2c.write(m_addr, (char *)data, len);
+    i2c.write(m_addr, (char *)data, len);
 }
