@@ -47,7 +47,7 @@ print("Exit AT mode.")
 print(char.decode())
 
 print("start sending RPC")
-v = np.ones(30)
+v = []
 # send RPC to remote
 s.write("/GetVelocity/run\r".encode())
 for i in range(30):

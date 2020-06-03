@@ -35,12 +35,19 @@ EventQueue acc_queue(32 * EVENTS_EVENT_SIZE);
 Thread acc_thread;
 
 
+float v[30];
+void GetVelocity(Arguments *in, Reply *out) {
+    pc.printf("Here\r\n");
+    for(int i = 0; i < 30; i++) {
+        pc.printf("v[%d] = %f\r\n", i, v[i]);
+        // xbee.printf("%f\r\n", v[i]);
+    }
+}
 
 void xbee_rx_interrupt(void);
 void xbee_rx(void);
 void FXOS8700CQ_readRegs(int addr, uint8_t * data, int len);
 void FXOS8700CQ_writeRegs(uint8_t * data, int len);
-void GetVelocity(Arguments *in, Reply *out);
 RPCFunction rpcAcc(&GetVelocity, "GetVelocity");
 void reply_messange(char *xbee_reply, char *messange);
 void check_addr(char *xbee_reply, char *messenger);
@@ -49,7 +56,6 @@ uint8_t data[2];
 int16_t acc16;
 float tt[3];
 uint8_t res[6];
-float v[30];
 int count_ = 0;
 int main(){
     // Enable the FXOS8700Q
@@ -151,6 +157,11 @@ void xbee_rx(void)
     RPC::call(buf, outbuf);
     // pc.printf("%s\r\n", outbuf);
     wait(0.1);
+    wait(5);
+    for(int i = 0; i < 30; i++) {
+        pc.printf("v[%d] = %f\r\n", i, v[i]);
+        xbee.printf("%f\r\n", v[i]);
+    }
   }
   xbee.attach(xbee_rx_interrupt, Serial::RxIrq); // reattach interrupt
 }
@@ -177,13 +188,6 @@ void check_addr(char *xbee_reply, char *messenger){
   xbee_reply[1] = '\0';
   xbee_reply[2] = '\0';
   xbee_reply[3] = '\0';
-}
-void GetVelocity(Arguments *in, Reply *out) {
-    pc.printf("Here\r\n");
-    for(int i = 0; i < 30; i++) {
-        pc.printf("v[%d] = %f\r\n", i, v[i]);
-        xbee.printf("%f\r\n", v[i]);
-    }
 }
 void FXOS8700CQ_readRegs(int addr, uint8_t * data, int len) {
    char t = addr;
